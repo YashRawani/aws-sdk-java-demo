@@ -12,7 +12,7 @@ import com.amazonaws.services.s3.model.*;
 
 public class DemoS3 
 {
-	AmazonS3 s3client = new AmazonS3Client();
+	static AmazonS3 client = new AmazonS3Client();
 
 	/**
 	 *
@@ -35,7 +35,7 @@ public class DemoS3
 		meta.addUserMetadata("Content-Disposition", "attachment");
 
 		// Do the upload now.
-		s3client.putObject(bucketName, key, inputStream, meta);
+		client.putObject(bucketName, key, inputStream, meta);
 	}
 
 	/**
