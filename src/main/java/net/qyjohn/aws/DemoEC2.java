@@ -3,6 +3,7 @@ package net.qyjohn.aws;
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import org.apache.log4j.Logger;
 
 import com.amazonaws.*;
 import com.amazonaws.auth.*;
@@ -14,6 +15,7 @@ import com.amazonaws.services.ec2.model.*;
 public class DemoEC2 
 {
 	public AmazonEC2Client client;
+	final static Logger logger = Logger.getLogger(DemoEC2.class);
 
 	/**
 	 *
@@ -92,7 +94,14 @@ public class DemoEC2
 
 			// Pass the TerminateInstancesRequest to EC2
 			TerminateInstancesResult result = client.terminateInstances(request);
-			System.out.println("Terminating instance " + instanceId);
+			List <InstanceStateChange> changes = result.getTerminatingInstances();
+			for (InstanceStateChange change : changes)
+			{
+				String id = change.getInstanceId();
+				String state_prev = change.getPreviousState().toString();
+				String state_next = change.getCurrentState().toString();
+				System.out.println("Instance " + id + " is changing from " + state_prev + " to " + state_next + ".");
+			}
 		} catch (Exception e)
 		{
 			// Simple exception handling by printing out error message and stack trace
