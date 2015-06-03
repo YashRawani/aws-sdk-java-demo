@@ -15,7 +15,7 @@ import com.amazonaws.services.ec2.model.*;
 public class DemoEC2 
 {
 	public AmazonEC2Client client;
-	final static Logger logger = Logger.getLogger(DemoEC2.class);
+//	final static Logger logger = Logger.getLogger(DemoEC2.class);
 
 	/**
 	 *
