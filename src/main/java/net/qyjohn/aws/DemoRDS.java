@@ -2,6 +2,7 @@ package net.qyjohn.aws;
 
 import java.io.*;
 import java.net.*;
+import java.sql.*;
 import java.util.*;
 import org.apache.log4j.Logger;
 
@@ -9,13 +10,13 @@ import com.amazonaws.*;
 import com.amazonaws.auth.*;
 import com.amazonaws.auth.profile.*;
 import com.amazonaws.regions.*;
-import com.amazonaws.services.ec2.*;
-import com.amazonaws.services.ec2.model.*;
+import com.amazonaws.services.rds.*;
+import com.amazonaws.services.rds.model.*;
 
-public class DemoEC2 
+public class DemoRDS 
 {
-	public AmazonEC2Client client;
-//	final static Logger logger = Logger.getLogger(DemoEC2.class);
+	public AmazonRDSClient client;
+	final static Logger logger = Logger.getLogger(DemoRDS.class);
 
 	/**
 	 *
@@ -23,17 +24,17 @@ public class DemoEC2
 	 *
 	 */
 
-	public DemoEC2()
+	public DemoRDS()
 	{
-		// Create the AmazonEC2Client
-		client = new AmazonEC2Client();
+		// Create the AmazonRDSClient
+		client = new AmazonRDSClient();
 		// Set the region to ap-southeast-2
 		client.setRegion(Regions.AP_SOUTHEAST_2);
 	}
 
 	/**
 	 *
-	 * This method launches an EC2 instance. You will need to modify the parameters in this 
+	 * This method launches an RDS instance. You will need to modify the parameters in this 
 	 * method to make it work.
 	 *
 	 */
@@ -44,26 +45,42 @@ public class DemoEC2
 
 		try
 		{
-			// Construct a RunInstancesRequest.
-			RunInstancesRequest request = new RunInstancesRequest();
-			request.setImageId("ami-fd9cecc7");	// the AMI ID, ami-fd9cecc7 is Amazon Linux AMI 2015.03 (HVM)
-			request.setInstanceType("t2.micro");	// instance type
-			request.setKeyName("desktop");		// the keypair
-			request.setSubnetId("subnet-2dc0d459");	// the subnet
+			// The CreateDBInstanceRequest object
+			CreateDBInstanceRequest request = new CreateDBInstanceRequest();
+			request.setDBInstanceIdentifier("Sydney");	// RDS instance name
+			request.setDBInstanceClass("db.t2.micro");
+			request.setEngine("MySQL");		
+			request.setMultiAZ(false);
+			request.setMasterUsername("username");
+			request.setMasterUserPassword("password");
+			request.setDBName("mydb");		// database name 
+			request.setStorageType("gp2");		// standard, gp2, io1
+			request.setAllocatedStorage(10);	// in GB
+
+			// VPC security groups 
 			ArrayList<String> list = new ArrayList<String>();
 			list.add("sg-efcc248a");			// security group, call add() again to add more than one
-			request.setSecurityGroupIds(list);
-			request.setMinCount(1);	// minimum number of instances to be launched
-			request.setMaxCount(1);	// maximum number of instances to be launched
+			request.setVpcSecurityGroupIds(list);
 
-			// Pass the RunInstancesRequest to EC2.
-			RunInstancesResult  result  = client.runInstances(request);
-			String instanceId = result.getReservation().getInstances().get(0).getInstanceId();
-			
-			// Return the first instance id in this reservation.
-			// So, don't launch multiple instances with this demo code.
-			System.out.println("Launching instance " + instanceId);
-			return instanceId;
+			// Create the RDS instance
+			DBInstance instance = client.createDBInstance(request);
+
+			// Information about the new RDS instance
+			String identifier = instance.getDBInstanceIdentifier();
+			String status = instance.getDBInstanceStatus();
+			Endpoint endpoint = instance.getEndpoint();
+			String endpoint_url = "Endpoint URL not available yet.";
+			if (endpoint != null)
+			{
+				endpoint_url = endpoint.toString();
+			}
+
+			// Do some printing work
+			System.out.println(identifier + "\t" + status);
+			System.out.println(endpoint_url);
+
+			// Return the DB instance identifier
+			return identifier;
 		} catch (Exception e)
 		{
 			// Simple exception handling by printing out error message and stack trace
@@ -76,32 +93,36 @@ public class DemoEC2
 
 	/**
 	 *
-	 * This method terminates an EC2 instance. The parameters include
-	 * @param instanceId
+	 * This method terminates an RDS instance. The parameters include
+	 * @param identifier
 	 *
 	 */
 
-	public void terminateInstance(String instanceId)
+	public void terminateInstance(String identifier)
 	{
 		System.out.println("\n\nTERMINATE INSTANCE\n\n");
 		try
 		{
-			// Construct the TerminateInstancesRequest
-			TerminateInstancesRequest request = new TerminateInstancesRequest();
-			ArrayList<String> list = new ArrayList<String>();
-			list.add(instanceId);			// instance id
-			request.setInstanceIds(list);
+			// The DeleteDBInstanceRequest 
+			DeleteDBInstanceRequest request = new DeleteDBInstanceRequest();
+			request.setDBInstanceIdentifier(identifier);
+			request.setSkipFinalSnapshot(true);
+			
+			// Delete the RDS instance
+			DBInstance instance = client.deleteDBInstance(request);
 
-			// Pass the TerminateInstancesRequest to EC2
-			TerminateInstancesResult result = client.terminateInstances(request);
-			List <InstanceStateChange> changes = result.getTerminatingInstances();
-			for (InstanceStateChange change : changes)
+			// Information about the RDS instance being deleted
+			String status = instance.getDBInstanceStatus();
+			Endpoint endpoint = instance.getEndpoint();
+			String endpoint_url = "Endpoint URL not available yet.";
+			if (endpoint != null)
 			{
-				String id = change.getInstanceId();
-				String state_prev = change.getPreviousState().toString();
-				String state_next = change.getCurrentState().toString();
-				System.out.println("Instance " + id + " is changing from " + state_prev + " to " + state_next + ".");
+				endpoint_url = endpoint.toString();
 			}
+
+			// Do some printing work
+			System.out.println(identifier + "\t" + status);
+			System.out.println(endpoint_url);
 		} catch (Exception e)
 		{
 			// Simple exception handling by printing out error message and stack trace
@@ -112,7 +133,7 @@ public class DemoEC2
 
 	/**
 	 *
-	 * This method lists all the EC2 instances in a region.
+	 * This method lists all the RDS instances in a region.
 	 *
 	 */
 
@@ -121,27 +142,28 @@ public class DemoEC2
 		System.out.println("\n\nLIST INSTANCE\n\n");
         	try 
 		{
-			// DescribeInstances
-			DescribeInstancesResult result = client.describeInstances();
-
-			// Traverse through the reservations
-			List<Reservation> reservations = result.getReservations();
-			for (Reservation reservation: reservations)
+			// Describe DB instances
+			DescribeDBInstancesResult result = client.describeDBInstances();
+			
+			// Getting a list of the RDS instances
+			List<DBInstance> instances = result.getDBInstances();
+			for (DBInstance instance : instances)
 			{
-				// Print out the reservation id
-				String reservation_id = reservation.getReservationId();
-				System.out.println("Reservation: " + reservation_id);
-				// Traverse through the instances in a reservation
-				List<Instance> instances = reservation.getInstances();
-				for (Instance instance: instances)
+				// Information about each RDS instance
+				String identifier = instance.getDBInstanceIdentifier();
+				String engine = instance.getEngine();
+				String status = instance.getDBInstanceStatus();
+				Endpoint endpoint = instance.getEndpoint();
+				String endpoint_url = "Endpoint URL not available yet.";
+				if (endpoint != null)
 				{
-					// Print out some information about the instance
-					String id = instance.getInstanceId();
-					String state = instance.getState().getName();
-					System.out.println("\t" + id + "\t" + state);
+					endpoint_url = endpoint.toString();
 				}
-			}
 
+				// Do some printing work
+				System.out.println(identifier + "\t" + engine + "\t" + status);
+				System.out.println("\t" + endpoint_url);
+			}
 	        } catch (Exception e) 
 		{
 			// Simple exception handling by printing out error message and stack trace
@@ -153,10 +175,62 @@ public class DemoEC2
 
 	/**
 	 *
+	 * This method connects to a RDS MySQL instance to do a large number of INSERT operations.
+	 * This is an infinite loop and you can use CTRL C to break the execution.
+	 *
+	 */
+
+	public void runJdbcTests()
+	{
+		try 
+		{
+			// Getting database properties from db.properties
+			Properties prop = new Properties();
+			InputStream input = new FileInputStream("db.properties");
+			prop.load(input);
+			String db_hostname = prop.getProperty("db_hostname");
+			String db_username = prop.getProperty("db_username");
+			String db_password = prop.getProperty("db_password");
+			String db_database = prop.getProperty("db_database");
+
+			// Load the MySQL JDBC driver
+			Class.forName("com.mysql.jdbc.Driver");
+			String jdbc_url = "jdbc:mysql://" + db_hostname + "/" + db_database + "?user=" + db_username + "&password=" + db_password;
+
+			// Run an infinite loop 
+			Connection connect = null;
+			while (true)
+			{
+				try
+				{
+					if (connect == null)
+					{
+						// Create a connection using the JDBC driver
+						connect = DriverManager.getConnection(jdbc_url);
+
+						// Do some INSERT
+
+						// Do some SELECT
+					}
+				} catch (Exception e1)
+				{
+				}
+			}
+
+		} catch (Exception e)
+		{
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+		}
+	}
+
+
+	/**
+	 *
 	 * This demo does the following things:
-	 * (1) Launch an EC2 instance in the default VPC in us-east-1 region
-	 * (2) list all the EC2 instances in the us-east-1 region
-	 * (3) wait for the EC2 instance launched in step (1) to become available, then terminate it.
+	 * (1) Launch an RDS instance in the default VPC in us-east-1 region
+	 * (2) list all the RDS instances in the us-east-1 region
+	 * (3) terminate the RDS instance we launched.
 	 *
 	 */
 
@@ -164,26 +238,26 @@ public class DemoEC2
 	{
         	try 
 		{
-			// Create an instance of the DemoEC2 class
-			DemoEC2 demo = new DemoEC2();
+			// Create an instance of the DemoRDS class
+			DemoRDS demo = new DemoRDS();
 			
-			// Launch a new EC2 instance for testing
-			String instanceId = demo.launchInstance();
-			// Sleep for 10 seconds
-			Thread.sleep(10000);
-			// List all the EC2 instances in the region
-			demo.listInstances();
-			// Sleep for 10 seconds
-			Thread.sleep(10000);
-			// Terminate the instance we just create
-			if (!instanceId.equals("ERROR"))
+			String action = args[0];
+			if (action.equals("launch"))
 			{
-				demo.terminateInstance(instanceId);
+				demo.launchInstance();
 			}
-			// Sleep for 10 seconds
-			Thread.sleep(10000);
-			// List all the EC2 instances in the region (again)
-			demo.listInstances();
+			else if (action.equals("list"))
+			{
+				demo.listInstances();
+			}
+			else if (action.equals("terminate"))
+			{
+				demo.terminateInstance("Sydney");	// The argument is the RDS instance identifier
+			}
+			else if (action.equals("jdbc"))
+			{
+				demo.runJdbcTests();
+			}
 	        } catch (Exception e) 
 		{
 			// Simple exception handling by printing out error message and stack trace

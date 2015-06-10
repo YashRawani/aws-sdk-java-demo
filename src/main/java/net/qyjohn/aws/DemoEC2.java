@@ -156,7 +156,7 @@ public class DemoEC2
 	 * This demo does the following things:
 	 * (1) Launch an EC2 instance in the default VPC in us-east-1 region
 	 * (2) list all the EC2 instances in the us-east-1 region
-	 * (3) wait for the EC2 instance launched in step (1) to become available, then terminate it.
+	 * (3) terminate the instance we launched.
 	 *
 	 */
 

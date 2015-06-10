@@ -2,6 +2,7 @@ package net.qyjohn.aws;
 
 import java.io.*;
 import java.net.*;
+import org.apache.log4j.Logger;
 
 import com.amazonaws.*;
 import com.amazonaws.auth.*;
@@ -13,6 +14,7 @@ import com.amazonaws.services.s3.model.*;
 public class DemoS3 
 {
 	static AmazonS3 client = new AmazonS3Client();
+	final static Logger logger = Logger.getLogger(DemoS3.class);
 
 	/**
 	 *
