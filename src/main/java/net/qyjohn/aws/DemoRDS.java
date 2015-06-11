@@ -50,7 +50,7 @@ public class DemoRDS
 			request.setDBInstanceIdentifier("Sydney");	// RDS instance name
 			request.setDBInstanceClass("db.t2.micro");
 			request.setEngine("MySQL");		
-			request.setMultiAZ(false);
+			request.setMultiAZ(true);
 			request.setMasterUsername("username");
 			request.setMasterUserPassword("password");
 			request.setDBName("mydb");		// database name 
@@ -182,6 +182,7 @@ public class DemoRDS
 
 	public void runJdbcTests()
 	{
+		System.out.println("\n\nJDBC TESTS\n\n");
 		try 
 		{
 			// Getting database properties from db.properties
@@ -198,29 +199,50 @@ public class DemoRDS
 			String jdbc_url = "jdbc:mysql://" + db_hostname + "/" + db_database + "?user=" + db_username + "&password=" + db_password;
 
 			// Run an infinite loop 
-			Connection connect = null;
+			Connection conn = null;
 			while (true)
 			{
 				try
 				{
-					if (connect == null)
+					// Create a connection using the JDBC driver
+					conn = DriverManager.getConnection(jdbc_url);
+
+					// Create the test table if not exists
+					Statement statement = conn.createStatement();
+					String sql = "CREATE TABLE IF NOT EXISTS jdbc_test (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, content VARCHAR(80))";
+					statement.executeUpdate(sql);
+
+					// Do some INSERT
+					PreparedStatement preparedStatement = conn.prepareStatement("INSERT INTO jdbc_test (content) VALUES (?)");
+					String content = "" + UUID.randomUUID();
+					preparedStatement.setString(1, content);
+					preparedStatement.executeUpdate();
+					System.out.println("INSERT: " + content);
+
+					// Do some SELECT
+					sql = "SELECT COUNT(*) as count FROM jdbc_test";
+					ResultSet resultSet = statement.executeQuery(sql);
+					if (resultSet.next())
 					{
-						// Create a connection using the JDBC driver
-						connect = DriverManager.getConnection(jdbc_url);
-
-						// Do some INSERT
-
-						// Do some SELECT
+						int count = resultSet.getInt("count");
+						System.out.println("Total Records: " + count);
 					}
+
+					// Close the connection
+					conn.close();
+
+					// Sleep for some time
+					Thread.sleep(20000);
 				} catch (Exception e1)
 				{
+					System.out.println(e1.getMessage());
+					e1.printStackTrace();
 				}
 			}
-
-		} catch (Exception e)
+		} catch (Exception e0)
 		{
-			System.out.println(e.getMessage());
-			e.printStackTrace();
+			System.out.println(e0.getMessage());
+			e0.printStackTrace();
 		}
 	}
 
