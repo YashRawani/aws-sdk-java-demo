@@ -3,6 +3,7 @@ package net.qyjohn.aws;
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.text.*;
 import org.apache.log4j.Logger;
 
 import com.amazonaws.*;
@@ -150,6 +151,43 @@ public class DemoEC2
 		}
 	}
 
+	public void describeSpotPrice()
+	{
+		DescribeSpotPriceHistoryRequest request = new DescribeSpotPriceHistoryRequest();
+//		request.setMaxResults(1000);
+
+try
+{
+//String string = "2015-06-11 22:26:31";
+//DateFormat format = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss", Locale.ENGLISH);
+//Date date = format.parse(string);
+
+//		request.setStartTime(format.parse(string));
+///		request.setNextToken("R03M9quCzPCqDAgt1qqnha/A4n/eHtwieVvJJ2W7hU42lBcVejSrXbBQRy8QEoNG");
+		DescribeSpotPriceHistoryResult 	result = client.describeSpotPriceHistory();
+		List <SpotPrice> prices = result.getSpotPriceHistory();
+		int i = 0;
+		for (SpotPrice price : prices)
+		{
+			i++;
+		}
+		System.out.println(i);
+/*
+		String token = result.getNextToken();
+		while (token != null)
+		{
+			System.out.println(token);
+			request = new DescribeSpotPriceHistoryRequest();
+			request.setMaxResults(1000);
+			request.setStartTime(date);
+			request.setNextToken(token);
+			result = client.describeSpotPriceHistory(request);
+
+			token = result.getNextToken();
+		}
+*/
+} catch (Exception e) {}
+	}
 
 	/**
 	 *
@@ -166,8 +204,8 @@ public class DemoEC2
 		{
 			// Create an instance of the DemoEC2 class
 			DemoEC2 demo = new DemoEC2();
-			
-			// Launch a new EC2 instance for testing
+			demo.describeSpotPrice();			
+/*			// Launch a new EC2 instance for testing
 			String instanceId = demo.launchInstance();
 			// Sleep for 10 seconds
 			Thread.sleep(10000);
@@ -184,6 +222,7 @@ public class DemoEC2
 			Thread.sleep(10000);
 			// List all the EC2 instances in the region (again)
 			demo.listInstances();
+*/
 	        } catch (Exception e) 
 		{
 			// Simple exception handling by printing out error message and stack trace
