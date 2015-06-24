@@ -29,7 +29,7 @@ public class DemoEC2
 		// Create the AmazonEC2Client
 		client = new AmazonEC2Client();
 		// Set the region to ap-southeast-2
-		client.setRegion(Regions.AP_SOUTHEAST_2);
+		client.configureRegion(Regions.AP_SOUTHEAST_2);
 	}
 
 	/**

@@ -29,7 +29,7 @@ public class DemoRedShift
 		// Create the AmazonRedshiftClient
 		client = new AmazonRedshiftClient();
 		// Set the region to ap-southeast-2
-		client.setRegion(Regions.AP_SOUTHEAST_2);
+		client.configureRegion(Regions.AP_SOUTHEAST_2);
 	}
 
 	/**

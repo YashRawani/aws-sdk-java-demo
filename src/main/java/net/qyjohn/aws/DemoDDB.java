@@ -29,7 +29,7 @@ public class DemoDDB
 		// Create the AmazonEC2Client
 		client = new AmazonDynamoDBClient();
 		// Set the region to ap-southeast-2
-		client.setRegion(Regions.AP_SOUTHEAST_2);
+		client.configureRegion(Regions.AP_SOUTHEAST_2);
 	}
 
 	public void updateItem()

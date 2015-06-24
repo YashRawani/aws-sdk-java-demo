@@ -29,7 +29,7 @@ public class DemoRDS
 		// Create the AmazonRDSClient
 		client = new AmazonRDSClient();
 		// Set the region to ap-southeast-2
-		client.setRegion(Regions.AP_SOUTHEAST_2);
+		client.configureRegion(Regions.AP_SOUTHEAST_2);
 	}
 
 	/**
