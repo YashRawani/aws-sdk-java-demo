@@ -151,43 +151,6 @@ public class DemoEC2
 		}
 	}
 
-	public void describeSpotPrice()
-	{
-		DescribeSpotPriceHistoryRequest request = new DescribeSpotPriceHistoryRequest();
-//		request.setMaxResults(1000);
-
-try
-{
-//String string = "2015-06-11 22:26:31";
-//DateFormat format = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss", Locale.ENGLISH);
-//Date date = format.parse(string);
-
-//		request.setStartTime(format.parse(string));
-///		request.setNextToken("R03M9quCzPCqDAgt1qqnha/A4n/eHtwieVvJJ2W7hU42lBcVejSrXbBQRy8QEoNG");
-		DescribeSpotPriceHistoryResult 	result = client.describeSpotPriceHistory();
-		List <SpotPrice> prices = result.getSpotPriceHistory();
-		int i = 0;
-		for (SpotPrice price : prices)
-		{
-			i++;
-		}
-		System.out.println(i);
-/*
-		String token = result.getNextToken();
-		while (token != null)
-		{
-			System.out.println(token);
-			request = new DescribeSpotPriceHistoryRequest();
-			request.setMaxResults(1000);
-			request.setStartTime(date);
-			request.setNextToken(token);
-			result = client.describeSpotPriceHistory(request);
-
-			token = result.getNextToken();
-		}
-*/
-} catch (Exception e) {}
-	}
 
 	/**
 	 *
@@ -204,8 +167,8 @@ try
 		{
 			// Create an instance of the DemoEC2 class
 			DemoEC2 demo = new DemoEC2();
-			demo.describeSpotPrice();			
-/*			// Launch a new EC2 instance for testing
+
+			// Launch a new EC2 instance for testing
 			String instanceId = demo.launchInstance();
 			// Sleep for 10 seconds
 			Thread.sleep(10000);
@@ -222,7 +185,6 @@ try
 			Thread.sleep(10000);
 			// List all the EC2 instances in the region (again)
 			demo.listInstances();
-*/
 	        } catch (Exception e) 
 		{
 			// Simple exception handling by printing out error message and stack trace
