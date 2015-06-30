@@ -27,7 +27,7 @@ public class DemoS3
 		// Create the AmazonRedshiftClient
 		client = new AmazonS3Client();
 		// Set the region to ap-southeast-2
-		client.setEndpoint("s3.ap-southeast-2.amazonaws.com");
+//		client.configureRegion(Regions.AP_SOUTHEAST_2);
 	}
 
 	/**
