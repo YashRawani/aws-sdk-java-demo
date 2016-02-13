@@ -64,7 +64,7 @@ public class DemoDataPipeline
 		List<PipelineIdName> list = result.getPipelineIdList();
 		for (PipelineIdName pipeline : list)
 		{
-			System.out.println(pipeline.getId() + "\t" + pipeline.getName());
+			System.out.println(pipeline.getId() + "\t- " + pipeline.getName());
 		}
 	}
 
@@ -100,8 +100,6 @@ public class DemoDataPipeline
 		// Definition of the Ec2Resource
 		Field ec2Type = new Field().withKey("type").withStringValue("Ec2Resource");
 		Field ec2TerminateAfter = new Field().withKey("terminateAfter").withStringValue("15 minutes");
-//		Field ec2Role = new Field().withKey("role").withStringValue("DataPipelineDefaultRole");
-//		Field ec2ResourceRole = new Field().withKey("resourceRole").withStringValue("DataPipelineDefaultResourceRole");
 		List<Field> ec2FieldList = Lists.newArrayList(ec2Type, ec2TerminateAfter);
 		PipelineObject ec2 = new PipelineObject().withName("Ec2Instance").withId("Ec2Instance").withFields(ec2FieldList);
 
@@ -136,8 +134,6 @@ public class DemoDataPipeline
 			logger.warn("Warnings found in definition: ");
 			putPipelineResult.getValidationWarnings().stream().forEach(e -> logger.warn(e));
 		}
-
-
 	}
 
 
