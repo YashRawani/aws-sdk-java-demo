@@ -12,7 +12,7 @@
     <Logger name="com.amazonaws.request" level="debug">
       <AppenderRef ref="Console"/>
     </Logger>
-    <Logger name="org.apache.http.wire" level="debug">
+    <Logger name="org.apache.http.wire" level="error">
       <AppenderRef ref="Console"/>
     </Logger>
   </Loggers>

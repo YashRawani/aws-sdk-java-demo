@@ -113,7 +113,7 @@ public class DemoRedShift
 		{
 			// Getting database properties from db.properties
 			Properties prop = new Properties();
-			InputStream input = new FileInputStream("redshift.properties");
+			InputStream input = new FileInputStream("db.properties");
 			prop.load(input);
 			String db_hostname = prop.getProperty("db_hostname");
 			String db_username = prop.getProperty("db_username");
